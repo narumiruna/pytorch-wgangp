@@ -39,15 +39,13 @@ def main():
 
     trainer = Trainer(net_g, net_d, optimizer_g, optimizer_d, dataloader, device)
 
-    os.makedirs('results', exist_ok=True)
-
     for epoch in range(config.epochs):
         loss_g, loss_d = trainer.train()
 
         print('Train epoch: {}/{},'.format(epoch + 1, config.epochs),
               'loss g: {:.6f}, loss d: {:.6f}.'.format(loss_g, loss_d))
 
-        trainer.save_sample('results/sample_{:02d}.jpg'.format(epoch + 1))
+        trainer.save_sample('samples/sample_{:02d}.jpg'.format(epoch + 1))
 
 
 if __name__ == '__main__':
