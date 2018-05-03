@@ -1,4 +1,3 @@
-
 import os
 
 import torch
@@ -10,7 +9,15 @@ from utils import AverageMeter
 
 
 class Trainer(object):
-    def __init__(self, net_g, net_d, optimizer_g, optimizer_d, dataloader, device, c=10.0):
+
+    def __init__(self,
+                 net_g,
+                 net_d,
+                 optimizer_g,
+                 optimizer_d,
+                 dataloader,
+                 device,
+                 c=10.0):
         self.net_g = net_g
         self.net_d = net_d
         self.optimizer_g = optimizer_g
@@ -32,7 +39,8 @@ class Trainer(object):
 
             fake = self.net_g(z).detach()
 
-            loss_d = - self.net_d(real).mean() + self.net_d(fake).mean() + self.c * self.gradient_penalty(real, fake).mean()
+            loss_d = -self.net_d(real).mean() + self.net_d(fake).mean(
+            ) + self.c * self.gradient_penalty(real, fake).mean()
 
             self.optimizer_d.zero_grad()
             loss_d.backward()
@@ -44,7 +52,7 @@ class Trainer(object):
             z = torch.randn(real.size(0), 100).to(self.device)
 
             fake = self.net_g(z)
-            loss_g = - self.net_d(fake).mean()
+            loss_g = -self.net_d(fake).mean()
 
             self.optimizer_g.zero_grad()
             loss_g.backward()
@@ -68,10 +76,12 @@ class Trainer(object):
     def gradient_penalty(self, real, fake):
         epsilon = torch.rand(real.size(0), 1, 1, 1).to(self.device)
 
-        interpolates = torch.tensor((epsilon * real + (1 - epsilon) * fake).data, requires_grad=True)
-        gradients = autograd.grad(self.net_d(interpolates),
-                                  interpolates,
-                                  grad_outputs=torch.ones(real.size(0)).to(self.device),
-                                  create_graph=True)[0]
+        interpolates = torch.tensor(
+            (epsilon * real + (1 - epsilon) * fake).data, requires_grad=True)
+        gradients = autograd.grad(
+            self.net_d(interpolates),
+            interpolates,
+            grad_outputs=torch.ones(real.size(0)).to(self.device),
+            create_graph=True)[0]
 
         return (gradients.view(real.size(0), -1).norm(2, dim=1) - 1).pow(2)

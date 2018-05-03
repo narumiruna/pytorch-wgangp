@@ -1,14 +1,11 @@
 import argparse
 
 import torch
-
-from models import Discriminator, Generator
-from trainer import Trainer
-
-from loader import get_loader
 from torch import optim
 
-import os
+from loader import get_loader
+from models import Discriminator, Generator
+from trainer import Trainer
 
 
 def main():
@@ -29,15 +26,19 @@ def main():
     print(net_d)
 
     # optimizer
-    optimizer_g = optim.Adam(net_g.parameters(), lr=config.lr, betas=(0.5, 0.999))
-    optimizer_d = optim.Adam(net_d.parameters(), lr=config.lr, betas=(0.5, 0.999))
+    optimizer_g = optim.Adam(
+        net_g.parameters(), lr=config.lr, betas=(0.5, 0.999))
+    optimizer_d = optim.Adam(
+        net_d.parameters(), lr=config.lr, betas=(0.5, 0.999))
 
     print(optimizer_d)
     print(optimizer_g)
+
     # data loader
     dataloader = get_loader(config.root, config.batch_size, config.workers)
 
-    trainer = Trainer(net_g, net_d, optimizer_g, optimizer_d, dataloader, device)
+    trainer = Trainer(net_g, net_d, optimizer_g, optimizer_d, dataloader,
+                      device)
 
     for epoch in range(config.epochs):
         loss_g, loss_d = trainer.train()

@@ -1,4 +1,5 @@
 class AverageMeter(object):
+
     def __init__(self):
         self.sum = 0
         self.count = 0
