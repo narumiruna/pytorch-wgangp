@@ -6,6 +6,7 @@ from torch import optim
 from loader import get_loader
 from models import Discriminator, Generator
 from trainer import Trainer
+from utils import PlotHelper
 
 
 def main():
@@ -39,7 +40,7 @@ def main():
 
     trainer = Trainer(net_g, net_d, optimizer_g, optimizer_d, dataloader,
                       device)
-
+    plotter = PlotHelper('samples/loss.html')
     for epoch in range(config.epochs):
         loss_g, loss_d = trainer.train()
 
@@ -47,6 +48,7 @@ def main():
               'loss g: {:.6f}, loss d: {:.6f}.'.format(loss_g, loss_d))
 
         trainer.save_sample('samples/sample_{:02d}.jpg'.format(epoch + 1))
+        plotter.append(loss_g, loss_d, epoch + 1)
 
 
 if __name__ == '__main__':

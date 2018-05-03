@@ -14,4 +14,5 @@ RUN pip3 install -U pip==9.0.3 \
     && pip3 install -U \
     http://download.pytorch.org/whl/cu91/torch-0.4.0-cp35-cp35m-linux_x86_64.whl \
     torchvision \
+    bokeh \
     && rm -rf ~/.cache/pip
