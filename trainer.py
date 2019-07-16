@@ -10,14 +10,7 @@ from utils import AverageMeter
 
 class Trainer(object):
 
-    def __init__(self,
-                 net_g,
-                 net_d,
-                 optimizer_g,
-                 optimizer_d,
-                 dataloader,
-                 device,
-                 c=10.0):
+    def __init__(self, net_g, net_d, optimizer_g, optimizer_d, dataloader, device, c=10.0):
         self.net_g = net_g
         self.net_d = net_d
         self.optimizer_g = optimizer_g
@@ -39,8 +32,9 @@ class Trainer(object):
 
             fake = self.net_g(z).detach()
 
-            loss_d = -self.net_d(real).mean() + self.net_d(fake).mean(
-            ) + self.c * self.gradient_penalty(real, fake).mean()
+            loss_d = -self.net_d(real).mean()
+            loss_d += self.net_d(fake).mean()
+            loss_d += self.c * self.gradient_penalty(real, fake).mean()
 
             self.optimizer_d.zero_grad()
             loss_d.backward()
@@ -74,14 +68,14 @@ class Trainer(object):
         save_image(fake.data, filename, normalize=True)
 
     def gradient_penalty(self, real, fake):
-        epsilon = torch.rand(real.size(0), 1, 1, 1).to(self.device)
+        batch_size = real.size(0)
+        epsilon = torch.rand(batch_size, 1, 1, 1, device=self.device)
 
-        interpolates = torch.tensor(
-            (epsilon * real + (1 - epsilon) * fake).data, requires_grad=True)
-        gradients = autograd.grad(
-            self.net_d(interpolates),
-            interpolates,
-            grad_outputs=torch.ones(real.size(0)).to(self.device),
-            create_graph=True)[0]
+        interpolates = epsilon * real + (1 - epsilon) * fake
+        interpolates = interpolates.clone().detach().requires_grad_(True)
+        gradients = autograd.grad(self.net_d(interpolates),
+                                  interpolates,
+                                  grad_outputs=torch.ones(batch_size, device=self.device),
+                                  create_graph=True)[0]
 
-        return (gradients.view(real.size(0), -1).norm(2, dim=1) - 1).pow(2)
+        return (gradients.view(batch_size, -1).norm(2, dim=1) - 1).pow(2)

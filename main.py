@@ -10,6 +10,10 @@ from utils import PlotHelper
 
 
 def main():
+    torch.random.manual_seed(0)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', type=str, default='data')
     parser.add_argument('--batch-size', type=int, default=128)
@@ -27,10 +31,8 @@ def main():
     print(net_d)
 
     # optimizer
-    optimizer_g = optim.Adam(
-        net_g.parameters(), lr=config.lr, betas=(0.5, 0.999))
-    optimizer_d = optim.Adam(
-        net_d.parameters(), lr=config.lr, betas=(0.5, 0.999))
+    optimizer_g = optim.Adam(net_g.parameters(), lr=config.lr, betas=(0.5, 0.999))
+    optimizer_d = optim.Adam(net_d.parameters(), lr=config.lr, betas=(0.5, 0.999))
 
     print(optimizer_d)
     print(optimizer_g)
@@ -38,8 +40,7 @@ def main():
     # data loader
     dataloader = get_loader(config.root, config.batch_size, config.workers)
 
-    trainer = Trainer(net_g, net_d, optimizer_g, optimizer_d, dataloader,
-                      device)
+    trainer = Trainer(net_g, net_d, optimizer_g, optimizer_d, dataloader, device)
     plotter = PlotHelper('samples/loss.html')
     for epoch in range(config.epochs):
         loss_g, loss_d = trainer.train()
